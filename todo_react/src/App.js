@@ -2,47 +2,92 @@ import logo from './logo.svg';
 import './App.css';
 import Header from "./MyComponents/Header";
 import {Todos} from "./MyComponents/Todos";
+import {AddTodo} from "./MyComponents/AddTodo";
+import {About} from "./MyComponents/About";
 import {Footer} from "./MyComponents/Footer";
+import React, {useState, useEffect} from 'react';
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
+
+
 
 
 
 function App() {
-  const onDelete=(todo)=>{
-    console.log("I am onDelete of todo ",todo);
+  let initTodo;
+  if(localStorage.getItem("todos")===null){
+    initTodo=[];
+  }
+  else{
+    initTodo=JSON.parse(localStorage.getItem("todos"));
   }
 
 
 
 
-  let todos=[
-    {
-      sno:1,
-      title:"Go to the market",
-      desc:"You need to go to the market"
-    },
+  const onDelete=(todo)=>{
+    setTodos(todos.filter((e)=>{
+      return e!==todo;
+    }));
+    localStorage.setItem("todos",JSON.stringify(todos));
+  }
 
-    {
-      sno:2,
-      title:"Go to the gym",
-      desc:"You need to go to the gym"
-    },
 
-    {
-      sno:3,
-      title:"Go to the mall",
-      desc:"You need to go to the mall"
+  const addTodo=(title,desc)=>{
+    let s=1;
+    if (todos.length>=1){
+      s=todos.length+1;
     }
-  ]
+    const myTodo={
+      sno:s,
+      title:title,
+      desc:desc
+    }
+    setTodos([...todos,myTodo]);
 
+
+  }
+
+
+
+  const [todos, setTodos]=useState(initTodo)
+  useEffect(()=>{
+    localStorage.setItem("todos",JSON.stringify(todos));
+  },[todos])
 
 
 
 
   return (
     <>
+    <Router>
     <Header title="My todos list" searchBar={true}/>
-    <Todos todos={todos} onDelete={onDelete}/>
+
+    <Switch>
+          <Route exact path="/" render={()=>{
+            return(
+              <>
+            <AddTodo addTodo={addTodo}/>
+            <Todos todos={todos} onDelete={onDelete}/>
+            </>
+          )
+          }}>
+
+          </Route>
+          <Route exact path="/about">
+            <About />
+          </Route>
+        </Switch>
+
+
+
+
     <Footer/>
+    </Router>
     </>
   );
 }
